@@ -4,7 +4,11 @@ import fs from "node:fs";
 import path from "node:path";
 
 // The desktop app points this at its Application Support folder; in development it's .data/ in the project.
-export const DATA_DIR = process.env.DOTS_DATA_DIR || path.join(/* turbopackIgnore: true */ process.cwd(), ".data");
+// Vercel's project directory is read-only, so use its writable temporary directory there.
+const defaultDataDir = process.env.VERCEL
+  ? path.join(/* turbopackIgnore: true */ process.env.TMPDIR || "/tmp", "open-dot")
+  : path.join(/* turbopackIgnore: true */ process.cwd(), ".data");
+export const DATA_DIR = process.env.DOTS_DATA_DIR || defaultDataDir;
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS dots (

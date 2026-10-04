@@ -17,15 +17,21 @@ export default function NewDot() {
   const [look, setLook] = useState<Look>(DEFAULT_LOOK);
   const [name, setName] = useState("");
   const [purpose, setPurpose] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const placeholder = "Pixel";
   const [pending, start] = useTransition();
   const wide = useMediaQuery("(min-width: 640px)");
 
   const create = () =>
     start(async () => {
-      const id = await createDot({ name: name || placeholder, purpose, look });
-      markRead(id);
-      router.push(`/dots/${id}`);
+      setError(null);
+      try {
+        const id = await createDot({ name: name || placeholder, purpose, look });
+        markRead(id);
+        router.push(`/dots/${id}`);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Could not create this dot. Please try again.");
+      }
     });
 
   return (
@@ -89,6 +95,7 @@ export default function NewDot() {
             <LookEditor look={look} onChange={setLook} />
           </div>
 
+          {error && <p role="alert" className="mt-4 rounded-lg bg-destructive/10 px-3 py-2 text-body-sm text-destructive">{error}</p>}
           <button className="btn-primary mt-8 h-10 w-full text-[15px]" disabled={pending} onClick={create}>
             {pending ? "Waking up…" : `Create ${name || placeholder}`}
           </button>
